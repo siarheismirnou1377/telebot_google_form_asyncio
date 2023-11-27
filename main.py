@@ -1,5 +1,5 @@
 import asyncio
-from sre_parse import State
+
 import time
 import random
 
@@ -11,18 +11,14 @@ from aiogram.filters import CommandStart
 from aiogram.enums import ParseMode
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
-from aiogram.types import (
+from aiogram.types import KeyboardButton, Message,ReplyKeyboardMarkup
 
-    KeyboardButton,
 
-    Message,
 
-    ReplyKeyboardMarkup,
-
-    ReplyKeyboardRemove,
-
-)
-
+# Нельзя задать ссылку пока идет проверка ссылки
+# Нужно назначить команду остановить, чтобы потом задать ссылку
+# Нужно добавить исключения если пользователь введет что-то кроме начать, задать ссылку или остановить
+# Так же нужно ввести проверку на валидность ссылки
 
 class FormUrl(StatesGroup):
     # Класс состояния
@@ -33,7 +29,7 @@ url_text = '' # Ссылка которую можно задать через �
 
 async def main():  
     # Запуск бота
-    bot = Bot('token', parse_mode=ParseMode.HTML)  # В ковычки вставить токен
+    bot = Bot('токен', parse_mode=ParseMode.HTML)  # В ковычки вставить токен
     dp = Dispatcher()
     dp.include_router(form_router)
     await dp.start_polling(bot)
@@ -52,8 +48,7 @@ async def parser_form(message: Message):
     # Парсинг формы и проверка  
     global url_text 
     count = 0
-
-    await message.answer("Начал отслеживать форму. Чтобы остановить процесс проверки и/или задать новую ссылку, сначала нажми 'Остановить.'")
+    await message.answer("Начал отслеживать форму. Чтобы остановить процесс проверки и/или задать новую ссылку, сначала нажми 'Остановить.'")    
     while True:
         interval = random.randint(5, 10)
         response = requests.get(url_text)
@@ -78,17 +73,10 @@ async def parser_form(message: Message):
             print('Третье условие', interval)
             break
 
-
-
-# Нельзя задать ссылку пока идет проверка ссылки
-# Нужно назначить команду остановить, чтобы потом задать ссылку
-
-            
 @form_router.message(F.text == "Задать ссылку")
 async def start_url(message: Message, state: FSMContext):
     await state.set_state(FormUrl.url)
     await message.answer("Скопируй ссылку и отправь мне.")
-
 
 @form_router.message(FormUrl.url)
 async def process_url(message: Message, state: FSMContext):
@@ -97,9 +85,5 @@ async def process_url(message: Message, state: FSMContext):
     url_text = url_text_local['url']
     print(url_text)
 
-
-        
-        
-   
 if __name__ == "__main__":
     asyncio.run(main())

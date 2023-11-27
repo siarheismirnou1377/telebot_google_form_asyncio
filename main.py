@@ -1,4 +1,5 @@
 import asyncio
+from sre_parse import State
 import time
 import random
 
@@ -6,18 +7,20 @@ from aiogram import Bot, Dispatcher
 from aiogram.filters import CommandStart
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.enums import ParseMode
+from aiogram.fsm.state import StatesGroup
+from aiogram.fsm.context import FSMContext
 
 import requests
 from bs4 import BeautifulSoup
 
 
 dp = Dispatcher()
-
-url = ''  # Ссылка которую можно задать через бота
+    
+url = 'url' # Ссылка которую можно задать через бота
 
 async def main():  # Запуск бота
 
-    bot = Bot('токен', parse_mode=ParseMode.HTML)  # В ковычки вставить токен
+    bot = Bot('token', parse_mode=ParseMode.HTML)  # В ковычки вставить токен
     await dp.start_polling(bot)
 
 @dp.message(CommandStart())  
@@ -30,7 +33,7 @@ async def start_bot(message: Message):  # Хендлим команду стар
 
 @dp.message()  
 async def parser_form(message: Message):  # Парсинг формы и проверка
-    global url
+    global url 
     count = 0
     
     if(message.text == "Начать"):
@@ -59,8 +62,8 @@ async def parser_form(message: Message):  # Парсинг формы и про�
                 print('Третье условие', interval)
                 break
     if (message.text == "Задать ссылку"):
-        await message.answer("Скопируй ссылку и отправь мне.")   
-    
+        await message.answer("Скопируй ссылку и отправь мне.")
+        
    
 if __name__ == "__main__":
     asyncio.run(main())

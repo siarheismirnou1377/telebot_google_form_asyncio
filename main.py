@@ -1,6 +1,6 @@
-import asyncio
-
 import random
+
+import asyncio
 
 import requests
 from bs4 import BeautifulSoup
@@ -10,19 +10,13 @@ from aiogram.filters import CommandStart, Command
 from aiogram.enums import ParseMode
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import KeyboardButton, Message,ReplyKeyboardMarkup
 
 
-
-
-
-# Нужно добавить исключения если пользователь введет что-то кроме начать, задать ссылку или остановить
 # Так же нужно ввести проверку на валидность ссылки
-# Разобраться нужна ли глобальная url_text
-# Нужно заменить цикл while на что-то другое
-# Можно сделать чтобы после третьего условия цикл не останавливался, а работал дальше, но переходил-->
-# к четвертому условию или второму.
+# Можно сделать чтобы после третьего условия цикл не останавливался, а работал дальше,-->
+# но переходил к четвертому условию или второму.
+
 
 class FormUrl(StatesGroup):
     # Класс состояния url
@@ -30,11 +24,11 @@ class FormUrl(StatesGroup):
     
 form_router = Router()    
 url_text = '' # Ссылка которую можно задать через бота
-stop_while = False
+stop_while = False  # Параметр работы цикла проверки
 
 async def main():  
     # Запуск бота
-    bot = Bot('токен', parse_mode=ParseMode.HTML)  # В кавычки вставить токен
+    bot = Bot('token', parse_mode=ParseMode.HTML)  # В кавычки вставить токен
     dp = Dispatcher()
     dp.include_router(form_router)
     await dp.start_polling(bot)
@@ -47,6 +41,16 @@ async def start_bot(message: Message):
  
     await message.reply(f"Привет, {(message.from_user.full_name)}! Нажми 'Задать ссылку', а потом 'Начать', чтобы отслеживать форму.",
                         reply_markup=keyboard)
+
+
+""" @form_router.message(Command("mycommand"))  # Запуск бота по собственной команде
+async def start_bot(message: Message):
+    # Хендлим команду старт и запускаем бота 
+    kb = [[KeyboardButton(text="Начать"), KeyboardButton(text="Задать ссылку"), KeyboardButton(text="Остановить")],]
+    keyboard = ReplyKeyboardMarkup(keyboard=kb)
+ 
+    await message.reply(f"Привет, {(message.from_user.full_name)}! Нажми 'Задать ссылку', а потом 'Начать', чтобы отслеживать форму.",
+                        reply_markup=keyboard) """
 
 @form_router.message(F.text == "Начать")  
 async def parser_form(message: Message):

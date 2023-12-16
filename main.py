@@ -1,7 +1,6 @@
 import random
-
+import logging
 import asyncio
-
 import requests
 from bs4 import BeautifulSoup
 
@@ -12,11 +11,7 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 from aiogram.types import KeyboardButton, Message,ReplyKeyboardMarkup
 
-
-# Так же нужно ввести проверку на валидность ссылки
-# Можно сделать чтобы после третьего условия цикл не останавливался, а работал дальше,-->
-# но переходил к четвертому условию или второму.
-
+# Прописать логгирование
 
 class FormUrl(StatesGroup):
     # Класс состояния url
@@ -28,7 +23,7 @@ stop_while = False  # Параметр работы цикла проверки
 
 async def main():  
     # Запуск бота
-    bot = Bot('token', parse_mode=ParseMode.HTML)  # В кавычки вставить токен
+    bot = Bot('токен', parse_mode=ParseMode.HTML)  # В кавычки вставить токен
     dp = Dispatcher()
     dp.include_router(form_router)
     await dp.start_polling(bot)
@@ -41,7 +36,6 @@ async def start_bot(message: Message):
  
     await message.reply(f"Привет, {(message.from_user.full_name)}! Нажми 'Задать ссылку', а потом 'Начать', чтобы отслеживать форму.",
                         reply_markup=keyboard)
-
 
 """ @form_router.message(Command("mycommand"))  # Запуск бота по собственной команде
 async def start_bot(message: Message):
@@ -71,28 +65,22 @@ async def parser_form(message: Message):
         if soup and count == 0:  # Если сродержт тег и это первый запуск
             await message.answer(text=elem_soup)
             count = 1
-            print('Первое условие', interval)
             await asyncio.sleep(interval)
             continue
         if soup and count == 1:  # Если содержит тег и это >= 2 запуску
-            print('Второе условие', interval)
             await asyncio.sleep(interval)
             continue
         if not soup and count >= 0:  # Если не содержит тег 
             await message.answer("Ссылка формы изменила свой статус. Проверь ссылку{0}".format(url_text))
             count = 0
-            print('Третье условие', interval)
             break
 
 @form_router.message(F.text == "Остановить")  
 async def parser_form(message: Message):
     global stop_while
     stop_while = False
-    print('stop bot')
     await message.answer("Остановил проверку. Чтобы запустить, задай ссылку и нажми 'Начать'.")
         
-
-
 @form_router.message(F.text == "Задать ссылку")
 # Отслеживаем "Задать ссылку"
 async def start_url(message: Message, state: FSMContext):
@@ -104,8 +92,16 @@ async def process_url(message: Message, state: FSMContext):
     global url_text
     url_text_local = await state.update_data(url=message.text)
     url_text = url_text_local['url']
-    await message.answer("Принял ссылку.Нажми 'Начать'.")
-    #print(url_text)
+    # Тут проверка валидности ссылки
+    try:
+        check = requests.head(url_text)
+        if check.status_code == 200:
+            await message.answer("Принял ссылку.Нажми 'Начать'.")
+        else:
+            await message.answer("Ссылка не валидна. Проверь ссылку и нажми 'Задать ссылку' снова.")
+    except requests.exceptions.MissingSchema:
+        await message.answer("Это не ссылка. Нажми 'Задать ссылку' снова. чтобы ввести правильный адрес.")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

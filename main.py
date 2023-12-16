@@ -1,6 +1,7 @@
 import random
 import logging
 import asyncio
+
 import requests
 from bs4 import BeautifulSoup
 
@@ -11,7 +12,16 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 from aiogram.types import KeyboardButton, Message,ReplyKeyboardMarkup
 
-# Прописать логгирование
+
+# Создаем объект логгера
+logger = logging.getLogger('my_logger')
+# Настраиваем логирование
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+# Создание обработчиков логирования
+file_handler = logging.FileHandler('my_log.txt') # Для записи логов в файл
+# Добавляем файловый обработчик к логгеру
+logger.addHandler(file_handler)
+
 
 class FormUrl(StatesGroup):
     # Класс состояния url
@@ -36,6 +46,9 @@ async def start_bot(message: Message):
  
     await message.reply(f"Привет, {(message.from_user.full_name)}! Нажми 'Задать ссылку', а потом 'Начать', чтобы отслеживать форму.",
                         reply_markup=keyboard)
+    
+    # Записываем информацию в лог
+    logger.info(f"Пользователь {message.from_user.id} вызвал команду /start")
 
 """ @form_router.message(Command("mycommand"))  # Запуск бота по собственной команде
 async def start_bot(message: Message):
@@ -54,6 +67,8 @@ async def parser_form(message: Message):
     stop_while = True
     count = 0
     await message.answer("Начал отслеживать форму. Чтобы остановить процесс проверки и/или задать новую ссылку, сначала нажми 'Остановить.'")    
+    # Записываем информацию в лог
+    logger.info(f"Пользователь {message.from_user.id} вызвал команду 'Начать'.")
     while stop_while:
         interval = random.randint(1, 120)
         response = requests.get(url_text)
@@ -80,12 +95,14 @@ async def parser_form(message: Message):
     global stop_while
     stop_while = False
     await message.answer("Остановил проверку. Чтобы запустить, задай ссылку и нажми 'Начать'.")
-        
+    logger.info(f"Пользователь {message.from_user.id} вызвал команду 'Остановить'.")   
+     
 @form_router.message(F.text == "Задать ссылку")
 # Отслеживаем "Задать ссылку"
 async def start_url(message: Message, state: FSMContext):
     await state.set_state(FormUrl.url)
     await message.answer("Скопируй ссылку и отправь мне. Затем, нажми 'Начать'.")
+    logger.info(f"Пользователь {message.from_user.id} вызвал команду 'Задать ссылку'.")
 
 @form_router.message(FormUrl.url)
 async def process_url(message: Message, state: FSMContext):
@@ -100,6 +117,8 @@ async def process_url(message: Message, state: FSMContext):
         else:
             await message.answer("Ссылка не валидна. Проверь ссылку и нажми 'Задать ссылку' снова.")
     except requests.exceptions.MissingSchema:
+        # Записываем ошибку в лог
+        logger.exception(f"Пользователь ввёл неправильную ссылку {requests.exceptions.MissingSchema}")
         await message.answer("Это не ссылка. Нажми 'Задать ссылку' снова. чтобы ввести правильный адрес.")
 
 

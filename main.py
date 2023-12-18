@@ -43,12 +43,12 @@ async def main():
 
 @form_router.errors()
 async def error_handler(event: ErrorEvent):
-    # Хендлинг общих критических ошибок. Логгирование в консоль.
+    # Обработка общих критических ошибок. Логгирование в консоль.
     logger.critical("Критическая ошибка вызванная %s", event.exception, exc_info=True)
 
 @form_router.message(CommandStart())  
 async def start_bot(message: Message):
-    # Хендлинг команды "/start".
+    # Обработка команды "/start".
     kb = [[KeyboardButton(text="Начать"), KeyboardButton(text="Задать ссылку"), KeyboardButton(text="Остановить")],]
     keyboard = ReplyKeyboardMarkup(keyboard=kb)
  
@@ -58,7 +58,7 @@ async def start_bot(message: Message):
 
 """ @form_router.message(Command("mycommand"))  # Запуск бота по собственной команде
 async def start_bot(message: Message):
-    # Хендлинг своей команды для запуска бота.
+    # Обработка своей команды для запуска бота.
     kb = [[KeyboardButton(text="Начать"), KeyboardButton(text="Задать ссылку"), KeyboardButton(text="Остановить")],]
     keyboard = ReplyKeyboardMarkup(keyboard=kb)
  
@@ -69,7 +69,7 @@ async def start_bot(message: Message):
 
 @form_router.message(F.text == "Начать")  
 async def parser_form(message: Message):
-    # Хендлинг команды "Начать". Парсинг формы.
+    # Обработка команды "Начать". Парсинг формы.
     global URL_TEXT 
     global STOP_WHILE
     STOP_WHILE= True
@@ -102,7 +102,7 @@ async def parser_form(message: Message):
 
 @form_router.message(F.text == "Остановить")  
 async def parser_form(message: Message):
-    # Хендлинг команды "Остановить"
+    # Обработка команды "Остановить"
     global STOP_WHILE
     STOP_WHILE = False
     await message.answer("Остановил проверку. Чтобы запустить, задай ссылку и нажми 'Начать'.")
@@ -111,7 +111,7 @@ async def parser_form(message: Message):
      
 @form_router.message(F.text == "Задать ссылку")
 async def start_url(message: Message, state: FSMContext):
-    # Хендлинг "Задать ссылку". Отслеживание состояния url. 
+    # Обработка команды "Задать ссылку". Отслеживание состояния url. 
     await state.set_state(FormUrl.url)
     await message.answer("Скопируй ссылку и отправь мне. Затем, нажми 'Начать'.")
     logger.info(f"Пользователь id = {message.from_user.id} name = {(message.from_user.full_name)} вызвал команду 'Задать ссылку'.")

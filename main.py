@@ -5,7 +5,7 @@ import asyncio
 import requests
 from bs4 import BeautifulSoup
 
-from aiogram import Bot, Dispatcher, F, Router, types
+from aiogram import Bot, Dispatcher, F, Router
 from aiogram.filters import CommandStart, Command
 from aiogram.enums import ParseMode
 from aiogram.fsm.state import StatesGroup, State

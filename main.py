@@ -1,5 +1,4 @@
 import asyncio
-from sre_parse import State
 import time
 import random
 
@@ -7,8 +6,6 @@ from aiogram import Bot, Dispatcher
 from aiogram.filters import CommandStart
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.enums import ParseMode
-from aiogram.fsm.state import StatesGroup
-from aiogram.fsm.context import FSMContext
 
 import requests
 from bs4 import BeautifulSoup
